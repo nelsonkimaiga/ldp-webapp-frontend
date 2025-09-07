@@ -24,7 +24,7 @@ function LoginPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${BASE_URL}/idp/api/v1/auth`, {
+      const res = await fetch(`${BASE_URL}/idp/api/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -121,8 +121,9 @@ function LoginPage() {
                 <input
                   type="email"
                   className="form-control"
-                  value={legacyEmail}
-                  onChange={(e) => setLegacyEmail(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
               <div className="mb-3">
@@ -130,17 +131,18 @@ function LoginPage() {
                 <input
                   type="password"
                   className="form-control"
-                  value={legacyPassword}
-                  onChange={(e) => setLegacyPassword(e.target.value)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
               </div>
               <button type="submit" className="btn btn-primary">
-                Login (Legacy)
+                Login
               </button>
             </form>
-            {legacyResponse && (
+            {response && (
               <pre className="mt-3">
-                {JSON.stringify(legacyResponse, null, 2)}
+                {JSON.stringify(response, null, 2)}
               </pre>
             )}
           </div>
