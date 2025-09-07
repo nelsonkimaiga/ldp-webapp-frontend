@@ -50,7 +50,7 @@ const Dashboard = () => {
       }
 
       const data = await res.text();
-      setUserData(data);
+      setUserData({ message: data });
     } catch (err) {
       console.error("Error fetching dashboard:", err);
       logout();
@@ -70,6 +70,7 @@ const Dashboard = () => {
     <div style={{ padding: "2rem" }}>
       <h2>Dashboard</h2>
       <p><strong>Welcome:</strong> {userData.email}</p>
+      <p><strong>Message:</strong> {userData.message}</p>
       <p><strong>Roles:</strong> {userData.roles.join(", ")}</p>
 
       {userData.roles.includes("ROLE_ADMIN") ? (
