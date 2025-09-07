@@ -7,22 +7,41 @@ function LoginPage() {
   const [legacyPassword, setLegacyPassword] = useState("");
   const [legacyResponse, setLegacyResponse] = useState(null);
   const [idpResponse, setIdpResponse] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [response, setResponse] = useState(null);
 
   const BASE_URL = "https://gfgp.ai/api";
   const [popupWindow, setPopupWindow] = useState(null);
 
+  const mockUsers = [
+    { email: "admin@example.com", password: "admin123", role: "Admin" },
+    { email: "user@example.com", password: "user123", role: "User" }
+  ];
+
+    // Handles legacy login through IdP
   const handleLegacyLogin = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await fetch(`${BASE_URL}/idp/api/v1/auth/login`, {
+      const res = await fetch(`${BASE_URL}/idp/api/v1/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: legacyEmail, password: legacyPassword }),
+        body: JSON.stringify({ email, password }),
       });
+
+      if (!res.ok) throw new Error("Invalid credentials");
+
       const data = await res.json();
-      setLegacyResponse(data);
+      localStorage.setItem("access_token", data.accessToken);
+      localStorage.setItem("refresh_token", data.refreshToken);
+
+      const decoded = jwtDecode(data.accessToken);
+      setResponse({ accessToken: data.accessToken, refreshToken: data.refreshToken, claims: decoded });
+
+      window.location.href = "/dashboard";
     } catch (err) {
-      setLegacyResponse({ error: err.message });
+      setResponse({ error: err.message });
     }
   };
 

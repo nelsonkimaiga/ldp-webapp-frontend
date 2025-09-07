@@ -22,23 +22,17 @@ const Dashboard = () => {
     if (!token || !refreshToken) return logout();
 
     try {
-      let claims = {};
-      try {
-        claims = jwtDecode(token);
-      } catch (err) {
-        console.error("Invalid JWT", err);
-        return logout();
-      }
+      const claims = jwtDecode(token);
 
-      const endpoint = claims.role && claims.role.toUpperCase() === "ADMIN"
-        ? "/api/v1/admin/dashboard"
-        : "/api/v1/user/dashboard";
+      const endpoint =
+        claims.role && claims.role.toLowerCase() === "admin"
+          ? "/api/v1/admin/dashboard"
+          : "/api/v1/user/dashboard";
 
       const res = await fetch(`${CLIENT_BASE_URL}${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Handle expired token
       if (res.status === 401) {
         const refreshRes = await fetch(`${CLIENT_BASE_URL}/api/refresh`, {
           method: "POST",
@@ -53,7 +47,6 @@ const Dashboard = () => {
         if (data.refreshToken) localStorage.setItem("refresh_token", data.refreshToken);
         token = data.accessToken;
 
-        // Retry fetch
         return fetchDashboard();
       }
 
@@ -61,7 +54,7 @@ const Dashboard = () => {
 
       setUserData({
         email: claims.email || "Unknown",
-        roles: claims.role ? [claims.role] : ["ROLE_USER"],
+        role: claims.role || "User",
         message,
       });
     } catch (err) {
@@ -79,7 +72,7 @@ const Dashboard = () => {
   if (loading) return <p>Loading dashboard...</p>;
   if (!userData) return <p>Redirecting to login...</p>;
 
-  const isAdmin = userData.roles.includes("ROLE_ADMIN");
+  const isAdmin = userData.role.toLowerCase() === "admin";
 
   return (
     <div style={{ padding: "2rem" }}>
