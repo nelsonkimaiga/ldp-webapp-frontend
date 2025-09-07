@@ -53,6 +53,8 @@ function LoginPage() {
         });
       }
 
+       window.location.href = "/dashboard";
+
       if (event.data.type === "IDP_AUTH_ERROR") {
         setIdpResponse({ error: event.data.error });
       }
