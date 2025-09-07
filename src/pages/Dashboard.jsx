@@ -34,7 +34,7 @@ const Dashboard = () => {
       });
 
       if (res.status === 401) {
-        const refreshRes = await fetch(`${CLIENT_BASE_URL}/api/refresh`, {
+        const refreshRes = await fetch(`${CLIENT_BASE_URL}/api/v1/refresh`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ refreshToken }),
