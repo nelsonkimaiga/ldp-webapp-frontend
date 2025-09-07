@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 
 const CLIENT_BASE_URL = "https://gfgp.ai/client-api";
 
 const Dashboard = () => {
-  const [claims, setClaims] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -15,35 +14,45 @@ const Dashboard = () => {
     navigate("/");
   };
 
-  const validateAndRefreshToken = async () => {
+  const fetchDashboard = async () => {
     let token = localStorage.getItem("access_token");
     const refreshToken = localStorage.getItem("refresh_token");
 
     if (!token || !refreshToken) return logout();
 
     try {
-      const decoded = jwtDecode(token);
-      const expiry = decoded.exp * 1000;
+      // Call user/admin dashboard based on role
+      const endpoint = token.includes("ADMIN")
+        ? "/api/v1/admin/dashboard"
+        : "/api/v1/user/dashboard";
 
-      if (Date.now() > expiry) {
-        // Token expired → refresh
-        const res = await fetch(`${CLIENT_BASE_URL}/api/refresh`, {
+      const res = await fetch(`${CLIENT_BASE_URL}${endpoint}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.status === 401) {
+        // Token might be expired → refresh
+        const refreshRes = await fetch(`${CLIENT_BASE_URL}/api/refresh`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refreshToken })
+          body: JSON.stringify({ refreshToken }),
         });
 
-        if (!res.ok) return logout();
+        if (!refreshRes.ok) return logout();
 
-        const data = await res.json();
+        const data = await refreshRes.json();
         localStorage.setItem("access_token", data.accessToken);
         if (data.refreshToken) localStorage.setItem("refresh_token", data.refreshToken);
         token = data.accessToken;
+
+        // Retry dashboard fetch
+        return fetchDashboard();
       }
 
-      setClaims(jwtDecode(token));
+      const data = await res.json();
+      setUserData(data);
     } catch (err) {
-      console.error("Token validation failed", err);
+      console.error("Error fetching dashboard:", err);
       logout();
     } finally {
       setLoading(false);
@@ -51,19 +60,19 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    validateAndRefreshToken();
+    fetchDashboard();
   }, []);
 
   if (loading) return <p>Loading dashboard...</p>;
-  if (!claims) return <p>Redirecting to login...</p>;
+  if (!userData) return <p>Redirecting to login...</p>;
 
   return (
     <div style={{ padding: "2rem" }}>
       <h2>Dashboard</h2>
-      <p><strong>Welcome:</strong> {claims.email}</p>
-      <p><strong>Role:</strong> {claims.role}</p>
+      <p><strong>Welcome:</strong> {userData.email}</p>
+      <p><strong>Roles:</strong> {userData.roles.join(", ")}</p>
 
-      {claims.role === "Admin" ? (
+      {userData.roles.includes("ROLE_ADMIN") ? (
         <div style={{ color: "darkred" }}>
           <h3>Admin Controls</h3>
           <p>You can manage users, settings, and more.</p>
