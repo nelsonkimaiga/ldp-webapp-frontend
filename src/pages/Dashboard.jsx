@@ -26,7 +26,7 @@ const Dashboard = () => {
   return (
     <div style={{ padding: "2rem" }}>
       <h2>Dashboard</h2>
-      <p><strong>Welcome:</strong> {claims.sub}</p>
+      <p><strong>Welcome:</strong> {claims.email}</p>
       <p><strong>Role:</strong> {claims.role}</p>
 
       {claims.role === "Admin" ? (
