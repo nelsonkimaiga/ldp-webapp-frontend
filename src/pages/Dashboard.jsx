@@ -71,7 +71,6 @@ const Dashboard = () => {
       <h2>Dashboard</h2>
       <p><strong>Welcome:</strong> {userData.email}</p>
       <p><strong>Message:</strong> {userData.message}</p>
-      <p><strong>Roles:</strong> {userData.roles.join(", ")}</p>
 
       {userData.roles.includes("ROLE_ADMIN") ? (
         <div style={{ color: "darkred" }}>
