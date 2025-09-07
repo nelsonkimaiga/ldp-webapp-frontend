@@ -49,7 +49,7 @@ const Dashboard = () => {
         return fetchDashboard();
       }
 
-      const data = await res.json();
+      const data = await res.text();
       setUserData(data);
     } catch (err) {
       console.error("Error fetching dashboard:", err);
