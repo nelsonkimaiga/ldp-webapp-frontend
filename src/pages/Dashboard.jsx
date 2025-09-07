@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
 
 const CLIENT_BASE_URL = "https://gfgp.ai/client-api";
 
@@ -21,8 +22,15 @@ const Dashboard = () => {
     if (!token || !refreshToken) return logout();
 
     try {
-      // Call user/admin dashboard based on role
-      const endpoint = token.includes("ADMIN")
+      let claims = {};
+      try {
+        claims = jwtDecode(token);
+      } catch (err) {
+        console.error("Invalid JWT", err);
+        return logout();
+      }
+
+      const endpoint = claims.role && claims.role.toUpperCase() === "ADMIN"
         ? "/api/v1/admin/dashboard"
         : "/api/v1/user/dashboard";
 
@@ -30,8 +38,8 @@ const Dashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      // Handle expired token
       if (res.status === 401) {
-        // Token might be expired → refresh
         const refreshRes = await fetch(`${CLIENT_BASE_URL}/api/refresh`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -45,12 +53,17 @@ const Dashboard = () => {
         if (data.refreshToken) localStorage.setItem("refresh_token", data.refreshToken);
         token = data.accessToken;
 
-        // Retry dashboard fetch
+        // Retry fetch
         return fetchDashboard();
       }
 
-      const data = await res.text();
-      setUserData({ message: data });
+      const message = await res.text();
+
+      setUserData({
+        email: claims.email || "Unknown",
+        roles: claims.role ? [claims.role] : ["ROLE_USER"],
+        message,
+      });
     } catch (err) {
       console.error("Error fetching dashboard:", err);
       logout();
@@ -66,13 +79,15 @@ const Dashboard = () => {
   if (loading) return <p>Loading dashboard...</p>;
   if (!userData) return <p>Redirecting to login...</p>;
 
+  const isAdmin = userData.roles.includes("ROLE_ADMIN");
+
   return (
     <div style={{ padding: "2rem" }}>
       <h2>Dashboard</h2>
       <p><strong>Welcome:</strong> {userData.email}</p>
       <p><strong>Message:</strong> {userData.message}</p>
 
-      {userData.roles.includes("ROLE_ADMIN") ? (
+      {isAdmin ? (
         <div style={{ color: "darkred" }}>
           <h3>Admin Controls</h3>
           <p>You can manage users, settings, and more.</p>
