@@ -150,7 +150,7 @@ function LoginPage() {
 
         {activeTab === "idp" && (
           <div className="text-center">
-            <p>Authenticate via centralized Identity Provider</p>
+            <p>Authenticate via OAuth</p>
             <button className="btn btn-primary" onClick={handleLinkedInLogin}>
               Login with LinkedIn
             </button>
