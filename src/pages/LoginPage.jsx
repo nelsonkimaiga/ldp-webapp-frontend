@@ -9,9 +9,8 @@ function LoginPage() {
   const [idpResponse, setIdpResponse] = useState(null);
 
   const BASE_URL = "https://gfgp.ai/api";
-  const HTML_WIDGET_URL = "https://nelsonkimaiga.github.io/idp-auth-widget/index.html";
+  const [popupWindow, setPopupWindow] = useState(null);
 
-  // Handle legacy login
   const handleLegacyLogin = async (e) => {
     e.preventDefault();
     try {
@@ -27,9 +26,17 @@ function LoginPage() {
     }
   };
 
+  const handleLinkedInLogin = () => {
+
+    const linkedInAuthUrl = `${BASE_URL}/auth/linkedin`;
+    const newWindow = window.open(linkedInAuthUrl, "_blank", "width=600,height=600");
+    setPopupWindow(newWindow);
+  };
+
   useEffect(() => {
     const handleMessage = (event) => {
-      if (event.origin !== "https://nelsonkimaiga.github.io") return;
+
+      if (event.origin !== "https://ldp-webapp-frontend.vercel.app") return;
 
       if (event.data.type === "IDP_AUTH_SUCCESS") {
         const { accessToken, refreshToken } = event.data;
@@ -49,11 +56,15 @@ function LoginPage() {
       if (event.data.type === "IDP_AUTH_ERROR") {
         setIdpResponse({ error: event.data.error });
       }
+
+      if (popupWindow) {
+        popupWindow.close();
+      }
     };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  }, [popupWindow]);
 
   return (
     <div className="container mt-5">
@@ -117,16 +128,9 @@ function LoginPage() {
         {activeTab === "idp" && (
           <div className="text-center">
             <p>Authenticate via centralized Identity Provider</p>
-            <iframe
-              src={HTML_WIDGET_URL}
-              title="IdP Auth Widget"
-              style={{
-                width: "100%",
-                maxWidth: "400px",
-                height: "500px",
-                border: "none",
-              }}
-            />
+            <button className="btn btn-primary" onClick={handleLinkedInLogin}>
+              Login with LinkedIn
+            </button>
             {idpResponse && (
               <pre className="mt-3">
                 {JSON.stringify(idpResponse, null, 2)}
