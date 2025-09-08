@@ -24,7 +24,7 @@ function LoginPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${BASE_URL}/idp/api/v1/auth/login`, {
+      const res = await fetch(`${BASE_URL}/idp/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -47,7 +47,7 @@ function LoginPage() {
 
   const handleLinkedInLogin = () => {
 
-    const linkedInAuthUrl = `${BASE_URL}/idp/api/v1/auth/linkedin`;
+    const linkedInAuthUrl = `${BASE_URL}/auth/linkedin`;
     const newWindow = window.open(linkedInAuthUrl, "_blank", "width=600,height=600");
     setPopupWindow(newWindow);
   };
