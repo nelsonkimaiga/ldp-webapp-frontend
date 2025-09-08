@@ -47,7 +47,7 @@ function LoginPage() {
 
   const handleLinkedInLogin = () => {
 
-    const linkedInAuthUrl = `${BASE_URL}/auth/linkedin`;
+    const linkedInAuthUrl = `${BASE_URL}/idp/auth/linkedin`;
     const newWindow = window.open(linkedInAuthUrl, "_blank", "width=600,height=600");
     setPopupWindow(newWindow);
   };
@@ -152,7 +152,7 @@ function LoginPage() {
           <div className="text-center">
             <p>Authenticate via OAuth</p>
             <button className="btn btn-primary" onClick={handleLinkedInLogin}>
-              Login with LinkedIn
+              Oauth Login with LinkedIn
             </button>
             {idpResponse && (
               <pre className="mt-3">
